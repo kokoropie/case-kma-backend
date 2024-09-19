@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -51,9 +52,27 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function isAdmin(): bool
+    public function isAdmin(): Attribute
     {
-        return $this->role === 'admin';
+        return Attribute::make(
+            get: fn () => $this->role === 'admin',
+            set: fn ($value) => $this->role = $value ? 'admin' : 'user'
+        );
+    }
+
+    public function billingAddress()
+    {
+        return $this->hasMany(BillingAddress::class, 'user_id', 'user_id');
+    }
+
+    public function shippingAddress()
+    {
+        return $this->hasMany(ShippingAddress::class, 'user_id', 'user_id');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id', 'user_id');
     }
     
     public function sendEmailVerificationNotification(): void
