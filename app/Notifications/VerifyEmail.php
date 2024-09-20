@@ -84,7 +84,7 @@ class VerifyEmail extends Notification
             return call_user_func(static::$createUrlCallback, $notifiable);
         }
 
-        return Config::get("app.frontend_url", "http://localhost:3000") .  str(URL::temporarySignedRoute(
+        $url = URL::temporarySignedRoute(
             'verification.verify',
             Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
             [
@@ -92,7 +92,8 @@ class VerifyEmail extends Notification
                 'hash' => sha1($notifiable->getEmailForVerification()),
             ],
             false
-        ))->replace('/api', '');
+        );
+        return str($url)->replace('/api', rtrim(Config::get("app.frontend_url", "http://localhost:3000"), "/"));
     }
 
     /**
