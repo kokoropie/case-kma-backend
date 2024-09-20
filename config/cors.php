@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000')],
+    'allowed_origins' => [parse_url(env('FRONTEND_URL', 'http://localhost:3000'), PHP_URL_SCHEME) . '://' . parse_url(env('FRONTEND_URL', 'http://localhost:3000'), PHP_URL_HOST) . ':*'],
 
     'allowed_origins_patterns' => [],
 
