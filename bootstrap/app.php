@@ -15,6 +15,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             '*',
         ]);
+        $middleware->use([
+            // \Illuminate\Http\Middleware\TrustHosts::class,
+            \Illuminate\Http\Middleware\TrustProxies::class,
+            \Illuminate\Http\Middleware\HandleCors::class,
+            \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
+            \Illuminate\Http\Middleware\ValidatePostSize::class,
+            \Illuminate\Foundation\Http\Middleware\TrimStrings::class,
+            \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        ]);
         $middleware->prepend([
             \App\Http\Middleware\JsonResponseMiddleware::class,
         ]);

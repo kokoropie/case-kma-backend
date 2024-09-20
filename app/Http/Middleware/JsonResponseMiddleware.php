@@ -28,13 +28,13 @@ class JsonResponseMiddleware
 
         $response = $next($request);
 
-        if (!($response instanceof JsonResponse)) {
-            $response = $this->responseFactory->json(
-                $response->content(), 
-                $response->status(), 
-                $response->headers->all()
-            );
-        }
+        // if (!($response instanceof JsonResponse)) {
+        //     $response = $this->responseFactory->json(
+        //         $response->content(), 
+        //         $response->status(), 
+        //         $response->headers->all()
+        //     );
+        // }
 
         return $response;
     }
