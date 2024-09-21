@@ -7,9 +7,4 @@ Route::middleware(['auth:sanctum', 'verified'])->get('/user', function (Request 
     return $request->user();
 });
 
-Route::middleware(['auth:sanctum'])->post('/user', function (Request $request) {
-    $request->user()->sendEmailVerificationNotification();
-    return response()->json(['message' => 'Email verification link sent!']);
-});
-
 require __DIR__.'/auth.php';
