@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('phone_models', function (Blueprint $table) {
             $table->string('slug')->primary();
             $table->string('name');
+            $table->string('image_url');
         });
     }
 

@@ -17,17 +17,15 @@ return new class extends Migration
             $table->integer('height');
             $table->string('image_url');
             $table->string('cropped_image_url');
-            $table->string('thumbnail_url');
-            $table->float('price');
             $table->string('model')->nullable();
             $table->string('color')->nullable();
-            $table->string('material')->nullable();
-            $table->enum('finish', ['smooth', 'textured']);
+            $table->enum('material', ['silicone', 'polycarbonate'])->default('silicone');
+            $table->enum('finish', ['smooth', 'textured'])->default('smooth');
+            $table->foreignId('user_id')->references('user_id')->on('users')->onDelete('cascade');
             $table->softDeletes();
 
             $table->foreign('color')->references('slug')->on('case_colors')->onDelete('set null');
             $table->foreign('model')->references('slug')->on('phone_models')->onDelete('set null');
-            $table->foreign('material')->references('slug')->on('case_materials')->onDelete('set null');
         });
     }
 

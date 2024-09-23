@@ -15,11 +15,14 @@ class Configuration extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'configuration_id',
         'color',
         'material',
         'model',
-        'price',
+        'finish',
+        'height',
+        'width',
+        'image_url',
+        'cropped_image_url',
     ];
 
     public function color()
@@ -27,13 +30,13 @@ class Configuration extends Model
         return $this->belongsTo(CaseColor::class, 'color', 'slug');
     }
 
-    public function material()
-    {
-        return $this->belongsTo(CaseMaterial::class, 'material', 'slug');
-    }
-
     public function model()
     {
         return $this->belongsTo(PhoneModel::class, 'model', 'slug');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

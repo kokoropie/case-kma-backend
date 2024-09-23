@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\CaseColor;
+use App\Models\PhoneModel;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,11 +14,36 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        PhoneModel::create([
+            'name' => 'iPhone 12',
+            'slug' => 'iphone-12',
+            'image_url' => 'https://via.placeholder.com/1170x2532'
+        ]);
+        PhoneModel::create([
+            'name' => 'iPhone 13',
+            'slug' => 'iphone-13',
+            'image_url' => 'https://via.placeholder.com/1170x2532'
+        ]);
+        PhoneModel::create([
+            'name' => 'iPhone 14',
+            'slug' => 'iphone-14',
+            'image_url' => 'https://via.placeholder.com/1170x2532'
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        CaseColor::create([
+            'name' => 'Black',
+            'slug' => 'black',
+            'hex_code' => '#000000'
+        ]);
+        CaseColor::create([
+            'name' => 'White',
+            'slug' => 'white',
+            'hex_code' => '#ffffff'
+        ]);
+        CaseColor::create([
+            'name' => 'Red',
+            'slug' => 'red',
+            'hex_code' => '#ff0000'
         ]);
     }
 }
