@@ -60,11 +60,6 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
-    public function billingAddress()
-    {
-        return $this->hasMany(BillingAddress::class, 'user_id', 'user_id');
-    }
-
     public function shippingAddress()
     {
         return $this->hasMany(ShippingAddress::class, 'user_id', 'user_id');

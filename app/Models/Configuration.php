@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,6 +24,9 @@ class Configuration extends Model
         'width',
         'image_url',
         'cropped_image_url',
+        'amount',
+        'amount_material',
+        'amount_finish',
     ];
 
     public function color()
@@ -38,5 +42,14 @@ class Configuration extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    public function totalAmount(): Attribute
+    {
+        return Attribute::make(
+            get: function (): int {
+                return $this->amount + $this->amount_material + $this->amount_finish;
+            }
+        );
     }
 }

@@ -16,11 +16,13 @@ class Order extends Model
     protected $primaryKey = 'order_id';
 
     protected $fillable = [
-        'billing_address_id',
         'shipping_address_id',
         'configuration_id',
+        'payment_method',
         'status',
+        'quantity',
         'amount',
+        'shipping_fee',
         'is_paid'
     ];
 
@@ -30,11 +32,6 @@ class Order extends Model
             'is_paid' => 'boolean',
             'status' => OrderStatus::class
         ];
-    }
-
-    public function billingAddress()
-    {
-        return $this->belongsTo(BillingAddress::class, 'billing_address_id', 'billing_address_id');
     }
 
     public function shippingAddress()
@@ -50,12 +47,5 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
-
-    protected function totalPrice(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->price * $this->configuration->price,
-        );
     }
 }

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\CaseColor;
 use App\Models\Configuration;
 use App\Models\PhoneModel;
+use App\Models\Config;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Validator;
 
 class ConfigurationController extends Controller
 {
@@ -17,12 +19,49 @@ class ConfigurationController extends Controller
     
     public function create()
     {
+        $config = Config::whereIn(
+            'key', 
+            [
+                'base_fee',
+                'material_fee',
+                'finish_fee',
+            ])
+            ->get()
+            ->keyBy('key')
+            ->map(
+                fn($config) => $config->value->toArray()
+            )
+            ->dot();
+        $base = $config->get('base_fee.value');
         $color = CaseColor::all();
         $model = PhoneModel::all();
-        $material = ['Silicone', 'Polycarbonate'];
-        $finish = ['Smooth', 'Textured'];
+        $material = [
+            [
+                'slug' => 'silicone',
+                'name' => 'Silicone',
+                'price' => 0
+            ], 
+            [
+                'slug' => 'polycarbonate',
+                'name' => 'Polycarbonate',
+                'price' => $config->get('material_fee.value')
+            ]
+        ];
+        $finish = [
+            [
+                'slug' => 'smooth',
+                'name' => 'Smooth',
+                'price' => 0
+            ], 
+            [
+                'slug' => 'textured',
+                'name' => 'Textured',
+                'price' => $config->get('finish_fee.value')
+            ]
+        ];
 
         return response()->json([
+            'base' => $base,
             'colors' => $color,
             'models' => $model,
             'materials' => $material,
@@ -32,7 +71,16 @@ class ConfigurationController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $data = collect($request->all());
+        $lowerValueWithKey = ["color". "model", "material", "finish"];
+        $data->transform(function ($value, $key) use ($lowerValueWithKey) {
+            if (in_array($key, $lowerValueWithKey)) {
+                return strtolower($value);
+            }
+            return $value;
+        });
+
+        $validated = Validator::validate($data->toArray(), [
             'image' => [
                 'required',
                 'string',
@@ -66,7 +114,6 @@ class ConfigurationController extends Controller
             'material' => [
                 'required',
                 function (string $attribute, mixed $value, \Closure $fail) {
-                    $value = strtolower($value);
                     if (!in_array($value, ['silicone', 'polycarbonate'])) {
                         $fail("The $attribute must be either 'Silicone' or 'Polycarbonate'.");
                     }
@@ -75,7 +122,6 @@ class ConfigurationController extends Controller
             'finish' => [
                 'required',
                 function (string $attribute, mixed $value, \Closure $fail) {
-                    $value = strtolower($value);
                     if (!in_array($value, ['smooth', 'textured'])) {
                         $fail("The $attribute must be either 'Smooth' or 'Textured'.");
                     }
@@ -100,6 +146,24 @@ class ConfigurationController extends Controller
             'image_url' => $image,
             'cropped_image_url' => $cropped_image,
         ]);
+
+        $config = Config::whereIn(
+            'key', 
+            [
+                'base_fee',
+                'material_fee',
+                'finish_fee',
+            ])
+            ->get()
+            ->keyBy('key')
+            ->map(
+                fn($config) => $config->value->toArray()
+            )
+            ->dot();
+
+        $data['amount'] = $config->get('base_fee.value');
+        $data['amount_material'] = $validated['material'] === 'silicone' ? 0 : $config->get('material_fee.value');
+        $data['amount_finish'] = $validated['finish'] === 'smooth' ? 0 : $config->get('finish_fee.value');
 
         unset($data['image']);
         unset($data['croppedImage']);

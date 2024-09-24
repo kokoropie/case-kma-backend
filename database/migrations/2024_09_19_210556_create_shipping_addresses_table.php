@@ -16,9 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('phone_number');
             $table->string('address');
-            $table->string('street');
+            $table->string('district');
             $table->string('province');
-            $table->string('city');
             $table->string('postal_code');
             $table->string('country');
             $table->foreignId('user_id')->references('user_id')->on('users')->onDelete('cascade');
