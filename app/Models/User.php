@@ -39,6 +39,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
+    protected $appends = ['is_admin'];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -60,7 +62,7 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
-    public function shippingAddress()
+    public function shippingAddresses()
     {
         return $this->hasMany(ShippingAddress::class, 'user_id', 'user_id');
     }

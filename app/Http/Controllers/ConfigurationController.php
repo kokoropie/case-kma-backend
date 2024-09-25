@@ -43,19 +43,21 @@ class ConfigurationController extends Controller
             ], 
             [
                 'slug' => 'polycarbonate',
-                'name' => 'Polycarbonate',
+                'name' => 'Soft Polycarbonate',
+                'description' => 'Scratch-resistant coating',
                 'price' => $config->get('material_fee.value')
             ]
         ];
         $finish = [
             [
                 'slug' => 'smooth',
-                'name' => 'Smooth',
+                'name' => 'Smooth Finish',
                 'price' => 0
             ], 
             [
                 'slug' => 'textured',
-                'name' => 'Textured',
+                'name' => 'Textured Finish',
+                'description' => 'Soft grippy texture',
                 'price' => $config->get('finish_fee.value')
             ]
         ];
