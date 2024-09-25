@@ -16,8 +16,8 @@ class ConfigurationController extends Controller
     {
         //
     }
-    
-    public function create()
+
+    private function listOptions()
     {
         $config = Config::whereIn(
             'key', 
@@ -62,13 +62,18 @@ class ConfigurationController extends Controller
             ]
         ];
 
-        return response()->json([
+        return [
             'base' => $base,
             'colors' => $color,
             'models' => $model,
             'materials' => $material,
             'finishes' => $finish,
-        ]);
+        ];
+    }
+    
+    public function create()
+    {
+        return response()->json($this->listOptions());
     }
 
     public function store(Request $request)
@@ -178,7 +183,7 @@ class ConfigurationController extends Controller
 
     public function show(Configuration $configuration)
     {
-        //
+        return response()->json($configuration->load(['model', 'color']));
     }
 
     public function edit(Configuration $configuration)
