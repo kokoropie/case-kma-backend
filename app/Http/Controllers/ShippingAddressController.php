@@ -68,7 +68,16 @@ class ShippingAddressController extends Controller
             ]
         );
 
-        if ($validated["country"] == "VN") $validated["postal_code"] = '';
+        if ($validated["country"] == "VN") {
+            $newPhone = "+84";
+            if (strpos($validated["phone_number"], "0") === 0) {
+                $newPhone .= substr($validated["phone_number"], 1);
+            } else {
+                $newPhone .= $validated["phone_number"];
+            }
+            $validated["phone_number"] = $newPhone;
+            $validated["postal_code"] = '';
+        }
 
         $user = auth('sanctum')->user();
         $shippingAddress = $user->shippingAddresses()->create($validated);
