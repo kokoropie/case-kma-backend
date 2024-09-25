@@ -68,6 +68,8 @@ class ShippingAddressController extends Controller
             ]
         );
 
+        if ($validated["country"] == "VN") $validated["postal_code"] = '';
+
         $user = auth('sanctum')->user();
         $shippingAddress = $user->shippingAddresses()->create($validated);
 
