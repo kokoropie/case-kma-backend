@@ -17,9 +17,16 @@ class Currency
     public static function convert($amount, ?string $from = null, string|array|null $to = null): array|float
     {
         $from = strtolower($from ?? 'usd');
-        $response = Http::get(
-            str(Constants::BASE_URL)->replace('{currency}', $from)
-        )->json();
+        $response = cache()
+            ->driver('file')
+            ->remember(
+                "currency_{$from}", 
+                3600, 
+                fn () =>
+                    Http::get(
+                        str(Constants::BASE_URL)->replace('{currency}', $from)
+                    )->json()
+            );
 
         $return = [];
 

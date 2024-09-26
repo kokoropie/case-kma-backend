@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Config;
 use App\ThirdParty\Address;
 use App\ThirdParty\Currency\Currency;
 use Http;
@@ -44,24 +45,6 @@ class ShippingInfoController extends Controller
                     }
                 },
             ],
-            "FromProvince" => [
-                "required_if:CountryCode,VN",
-                function (string $attribute, mixed $value, \Closure $fail) {
-                    $countryList = collect($this->province()->getData());
-                    if (!$countryList->contains('code', $value)) {
-                        $fail("The from province is invalid.");
-                    }
-                },
-            ],
-            "FromDistrict" => [
-                "required_if:CountryCode,VN",
-                function (string $attribute, mixed $value, \Closure $fail) use ($data) {
-                    $countryList = collect($this->district($data["FromProvince"])->getData());
-                    if (!$countryList->contains('code', $value)) {
-                        $fail("The from district is invalid.");
-                    }
-                },
-            ],
             "ToProvince" => [
                 "required_if:CountryCode,VN",
                 function (string $attribute, mixed $value, \Closure $fail) {
@@ -82,8 +65,21 @@ class ShippingInfoController extends Controller
             ],
         ]));
 
-        $param->getOrPut("FromProvince", 0);
-        $param->getOrPut("FromDistrict", 0);
+        $config = Config::whereIn(
+            'key', 
+            [
+                'from_province',
+                'from_district',
+            ])
+            ->get()
+            ->keyBy('key')
+            ->map(
+                fn($config) => $config->value->toArray()
+            )
+            ->dot();
+
+        $param->getOrPut("FromProvince", $config->get('from_province.value'));
+        $param->getOrPut("FromDistrict", $config->get('from_district.value'));
         $param->getOrPut("ToProvince", 0);
         $param->getOrPut("ToDistrict", 0);
         $param->put("weight", 1);

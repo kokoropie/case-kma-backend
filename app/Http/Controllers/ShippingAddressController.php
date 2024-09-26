@@ -90,7 +90,7 @@ class ShippingAddressController extends Controller
      */
     public function show(ShippingAddress $shippingAddress)
     {
-        //
+        return response()->json($shippingAddress);
     }
 
     /**
