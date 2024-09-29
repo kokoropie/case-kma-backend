@@ -4,10 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Config;
 use App\ThirdParty\Address;
-use App\ThirdParty\Currency\Currency;
-use Http;
 use Illuminate\Http\Request;
-use Str;
 use Validator;
 
 class ShippingInfoController extends Controller
@@ -78,40 +75,11 @@ class ShippingInfoController extends Controller
             )
             ->dot();
 
-        $param->getOrPut("FromProvince", $config->get('from_province.value'));
-        $param->getOrPut("FromDistrict", $config->get('from_district.value'));
+        $param->put("FromProvince", $config->get('from_province.value'));
+        $param->put("FromDistrict", $config->get('from_district.value'));
         $param->getOrPut("ToProvince", 0);
         $param->getOrPut("ToDistrict", 0);
-        $param->put("weight", 1);
-        $param->put("totalAmount", 0);
-        $param->put("Istype", 2);
-        $param->put("language", 0);
 
-        $url = "https://api.myems.vn/EmsDosmetic?";
-
-        $response = collect(Http::get($url, $param->toArray())->json());
-        
-        if ($response->get("Code") == "00") {
-            $return = collect(collect($response->get("Message"))->firstWhere('Type', '1'))->mapWithKeys(function ($item, $key) {
-                if ($key == "Rates") {
-                    return ["amount" => Currency::convert($item, "VND", "USD")];
-                }
-                if ($key == "Type") {
-                    return [];
-                }
-                return [strtolower($key) => $item];
-            });
-
-            if ($return->has("description"))
-            {
-                if ($return->get("description") != "QT") {
-                    $return->put("description", "TC");
-                }
-            }
-            
-            return response()->json($return);
-        }
-
-        return response()->json([]);
+        return response()->json(Address::cost($param));
     }
 }

@@ -1,7 +1,9 @@
 <?php 
 namespace App\ThirdParty;
+use App\ThirdParty\Currency\Currency;
 use Http;
 use Illuminate\Http\Client\Pool;
+use Illuminate\Support\Collection;
 use Str;
 
 class Address
@@ -196,5 +198,46 @@ class Address
     public static function districtDoesntExist(string $provinceCode, string $code): bool
     {
         return !self::districtExists($provinceCode, $code);
+    }
+
+    public static function cost(array|Collection $param): array
+    {
+        $param = collect($param);
+
+        $param->put("weight", 1);
+        $param->put("totalAmount", 0);
+        $param->put("Istype", 2);
+        $param->put("language", 0);
+
+        if ($param->get("CountryCode") !== "VN") {
+            $param->put("ToProvince", "0");
+            $param->put("ToDistrict", "0");
+        }
+
+        $url = "https://api.myems.vn/EmsDosmetic?";
+
+        $response = collect(Http::get($url, $param->toArray())->json());
+        
+        if ($response->get("Code") == "00") {
+            $return = collect(collect($response->get("Message"))->firstWhere('Type', '1'))->mapWithKeys(function ($item, $key) {
+                if ($key == "Rates") {
+                    return ["amount" => Currency::convert($item, "VND", "USD")];
+                }
+                if ($key == "Type") {
+                    return [];
+                }
+                return [strtolower($key) => $item];
+            });
+
+            if ($return->has("description"))
+            {
+                if ($return->get("description") != "QT") {
+                    $return->put("description", "TC");
+                }
+            }
+            
+            return $return->toArray();
+        }
+        return [];
     }
 }

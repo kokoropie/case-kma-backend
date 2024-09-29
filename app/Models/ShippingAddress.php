@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedByClass;
 use App\ThirdParty\Address;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -28,6 +29,19 @@ class ShippingAddress extends Model
 
     protected $appends = ['full_address'];
 
+    protected function casts(): array
+    {
+        return [
+            'name' => EncryptedByClass::class. ':' . User::class . ',user_id,email',
+            'phone_number' => EncryptedByClass::class. ':' . User::class . ',user_id,email',
+            'address' => EncryptedByClass::class. ':' . User::class . ',user_id,email',
+            'district' => EncryptedByClass::class. ':' . User::class . ',user_id,email',
+            'province' => EncryptedByClass::class. ':' . User::class . ',user_id,email',
+            'postal_code' => EncryptedByClass::class. ':' . User::class . ',user_id,email',
+            'country' => EncryptedByClass::class. ':' . User::class . ',user_id,email',
+        ];
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class, 'shipping_address_id', 'shipping_address_id');
@@ -49,6 +63,33 @@ class ShippingAddress extends Model
                     return "{$this->address}, {$district["name"]}, {$province["name"]}, {$country["name"]}";
                 }
                 return "{$this->address}, {$this->district}, {$this->province}, {$this->postal_code}, {$country["name"]}";
+            }
+        );
+    }
+
+    public function fee(): Attribute
+    {
+        return Attribute::make(
+            get: function (): float {
+                $config = Config::whereIn(
+                    'key', 
+                    [
+                        'from_province',
+                        'from_district',
+                    ])
+                    ->get()
+                    ->keyBy('key')
+                    ->map(
+                        fn($config) => $config->value->toArray()
+                    )
+                    ->dot();
+                return Address::cost([
+                    'CountryCode' => $this->country,
+                    'FromProvince' => $config->get('from_province.value'),
+                    'FromDistrict' => $config->get('from_district.value'),
+                    'ToProvince' => $this->province,
+                    'ToDistrict' => $this->district,
+                ])['amount'] ?: 0;
             }
         );
     }

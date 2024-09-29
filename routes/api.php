@@ -19,6 +19,9 @@ Route::middleware(['auth:sanctum'])->group( function () {
 
         Route::resource('/address', ShippingAddressController::class)->whereUuid('address')->except(['create', 'edit']);
         
+        Route::prefix('/payment')->group(function () {
+            Route::post('/', [PaymentController::class, 'store']);
+        });
     });
 });
 
@@ -28,5 +31,8 @@ Route::prefix('shipping')->group(function () {
     Route::get('/district/{provinceCode}', [ShippingInfoController::class, 'district']);
     Route::get('/cost', [ShippingInfoController::class, 'cost']);
 });
+
+
+Route::get('/{payment}-return', [PaymentController::class, 'return']);
 
 require __DIR__.'/auth.php';

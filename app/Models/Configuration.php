@@ -29,6 +29,8 @@ class Configuration extends Model
         'amount_finish',
     ];
 
+    protected $appends = ['total_amount'];
+
     public function color()
     {
         return $this->belongsTo(CaseColor::class, 'color', 'slug');

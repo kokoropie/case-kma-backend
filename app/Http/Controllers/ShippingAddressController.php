@@ -15,7 +15,19 @@ class ShippingAddressController extends Controller
     public function index()
     {
         $user = auth('sanctum')->user();
-        return response()->json($user->shippingAddresses);
+        $return = collect($user->shippingAddresses->toArray());
+        $return->transform(function ($address) {
+            $address = collect($address);
+            $address->forget('user_id');
+            if ($address->get('country') === 'VN') {
+                $address->put('postal_code', '');
+                $address->put('district', Address::district($address->get('province'), $address->get('district')));
+                $address->put('province', Address::province($address->get('province')));
+            }
+            $address->put('country', Address::country($address->get('country')));
+            return $address;
+        });
+        return response()->json($return);
     }
 
     /**
@@ -24,6 +36,7 @@ class ShippingAddressController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
+        $data['country'] = strtoupper($data['country'] ?? '');
         $validated = Validator::validate(
             $data,
             [
@@ -38,7 +51,7 @@ class ShippingAddressController extends Controller
                 ],
                 'district' => [
                     'required',
-                    function ($attribute, $value, $fail)  use ($data) {
+                    function ($attribute, $value, $fail) use ($data) {
                         if ($data['country'] === 'VN') {
                             if (Address::districtDoesntExist($data['province'], $value)) {
                                 $fail('The district is invalid.');
@@ -48,7 +61,7 @@ class ShippingAddressController extends Controller
                 ],
                 'province' => [
                     'required',
-                    function ($attribute, $value, $fail)  use ($data) {
+                    function ($attribute, $value, $fail) use ($data) {
                         if ($data['country'] === 'VN') {
                             if (Address::provinceDoesntExist($value)) {
                                 $fail('The district is invalid.');
@@ -65,22 +78,37 @@ class ShippingAddressController extends Controller
                         }
                     }
                 ],
+            ],
+            [
+                'phone_number.required' => 'The phone number field is required.',
+                'phone_number.string' => 'The phone number must be a string.',
+                'address.required' => 'The address field is required.',
+                'address.string' => 'The address must be a string.',
+                'district.required' => 'The district field is required.',
+                'province.required' => 'The province field is required.',
+                'postal_code.required_unless' => 'The postal code field is required.',
+                'country.required' => 'The country field is required.',
             ]
         );
 
+        $newPhone = Address::country($validated["country"])['dial'];
+        if (strpos($validated["phone_number"], "0") === 0) {
+            $newPhone .= substr($validated["phone_number"], 1);
+        } else {
+            $newPhone .= $validated["phone_number"];
+        }
+        $validated["phone_number"] = $newPhone;
+
         if ($validated["country"] == "VN") {
-            $newPhone = "+84";
-            if (strpos($validated["phone_number"], "0") === 0) {
-                $newPhone .= substr($validated["phone_number"], 1);
-            } else {
-                $newPhone .= $validated["phone_number"];
-            }
-            $validated["phone_number"] = $newPhone;
             $validated["postal_code"] = '';
         }
 
         $user = auth('sanctum')->user();
-        $shippingAddress = $user->shippingAddresses()->create($validated);
+        
+        $shippingAddress = new ShippingAddress();
+        $shippingAddress->user_id = $user->user_id;
+        $shippingAddress->fill($validated);
+        $shippingAddress->save();
 
         return response()->json($shippingAddress);
     }

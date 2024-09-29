@@ -6,7 +6,7 @@ class Currency
 {
     private static ?self $instance = null;
 
-    public static function getInstance()
+    private static function getInstance()
     {
         if (is_null(static::$instance)) {
             static::$instance = new self;
