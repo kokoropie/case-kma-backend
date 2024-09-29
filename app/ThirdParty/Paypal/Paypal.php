@@ -77,7 +77,7 @@ class Paypal
         $txnRef = $data['id'] ?? Str::uuid();
 
         $input = [
-            'intent' => Constants::INTENT_CAPTURE,
+            'intent' => Constants::INTENT_AUTHORIZE,
             'purchase_units' => [
                 [
                     'reference_id' => $txnRef,
