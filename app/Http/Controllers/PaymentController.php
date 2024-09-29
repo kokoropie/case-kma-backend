@@ -138,10 +138,7 @@ class PaymentController extends Controller
         $user->orders()->save($order);
 
         [$method, $info, $url] = match ($validated['method']) {
-            'paypal' => Paypal::amount($order->total_amount)->create([
-                'id' => $order->order_id
-            ]),
-            'card' => Vnpay::amount(Currency::convert($order->total_amount, 'USD', 'VND'))->card()->create([
+            'paypal', 'card' => Paypal::amount($order->total_amount)->create([
                 'id' => $order->order_id
             ]),
             'vnpay' => Vnpay::amount(Currency::convert($order->total_amount, 'USD', 'VND'))->payqr()->create([
