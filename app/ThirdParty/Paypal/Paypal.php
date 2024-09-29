@@ -97,6 +97,7 @@ class Paypal
                         "user_action" => Constants::USER_ACTION_PAY_NOW,
                         "locale" => config('paypal.locale'),
                         "return_url" => config('paypal.return_url'),
+                        "cancel_url" => config('paypal.cancel_url'),
                     ]
                 ]
             ]
@@ -108,6 +109,26 @@ class Paypal
         $link = collect($response->json()['links'])->firstWhere('rel', 'payer-action');
 
         return ["paypal", $response->json()['id'], $link['href']];
+    }
+    
+    public static function link($param) 
+    {
+        if (empty($param['token'])) {
+            return '';
+        }
+
+        if (self::success($param)) {
+            return '';
+        }
+        
+        $checkout = self::checkout($param['token']);
+        if (!$checkout) {
+            return '';
+        }
+
+        $link = collect($checkout['links'])->firstWhere('rel', 'payer-action');
+
+        return $link['href'];
     }
 
     private static function checkout(string $orderId)

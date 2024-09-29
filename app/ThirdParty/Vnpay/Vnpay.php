@@ -53,16 +53,11 @@ class Vnpay
 
     public static function create($data)
     {
+        $instance = self::getInstance();
+
         date_default_timezone_set('Asia/Ho_Chi_Minh');
 
-        $tmn_code = config('vnpay.tmn_code');
-        $hash_secret = config('vnpay.hash_secret');
-        $return_url = config('vnpay.return_url');
-        $expire = config('vnpay.expire');
-
         $txnRef = $data['id'] ?? Str::uuid();
-
-        $instance = self::getInstance();
 
         if (!empty($data['amount'])) {
             $instance->amount = $data['amount'];
@@ -76,7 +71,7 @@ class Vnpay
 
         $input = [
             'Version' => config('vnpay.version'),
-            'TmnCode' => $tmn_code,
+            'TmnCode' => config('vnpay.tmn_code'),
             'Amount' => $instance->amount * 100,
             'Command' => Constants::COMMAND_PAY,
             'CreateDate' => date('YmdHis'),
@@ -85,9 +80,9 @@ class Vnpay
             'Locale' => Constants::LOCALE,
             'OrderInfo' => str($instance->info)->ascii()->toString() ?: $txnRef,
             'OrderType' => Constants::ORDER_TYPE,
-            'ReturnUrl' => $return_url,
-            'TxnRef' => $txnRef,
-            'ExpireDate' => Carbon::now()->addMinutes($expire)->format('YmdHis'),
+            'ReturnUrl' => config('vnpay.return_url'),
+            'TxnRef' => $txnRef . "|" . time(),
+            'ExpireDate' => Carbon::now()->addMinutes(config('vnpay.expire'))->format('YmdHis'),
         ];
 
         if (!empty($instance->bank_code)) {
@@ -100,7 +95,9 @@ class Vnpay
             return urlencode(Constants::PREFIX . $key) . '=' . urlencode($value);
         })->implode('&');
 
-        $url = config('vnpay.url') . '?' . $data;
+        $url = config('vnpay.base_url') . Constants::PATH_PAYMENT . '?' . $data;
+
+        $hash_secret = config('vnpay.hash_secret');
 
         if (!empty($hash_secret)) {
             $url .= '&' . Constants::PREFIX . 'SecureHash=' . hash_hmac('sha512', $data, $hash_secret);
@@ -109,6 +106,11 @@ class Vnpay
         date_default_timezone_set(config('app.timezone'));
 
         return ["vnpay", "", $url];
+    }
+
+    public static function link($param) 
+    {
+        return static::create($param);
     }
 
     private static function verify(array $param): bool
@@ -139,7 +141,7 @@ class Vnpay
         $secureHash = $data->pull(Constants::PREFIX . 'SecureHash');
 
         $data = $data->map(function ($value, $key) {
-            return $key . '=' . $value;
+            return $key . '=' . urlencode($value);
         })->implode('&');
 
         return $secureHash === hash_hmac('sha512', $data, $hash_secret);
@@ -159,7 +161,7 @@ class Vnpay
             return null;
         }
         return [
-            'id' => $param[Constants::PREFIX . 'TxnRef'],
+            'id' => str($param[Constants::PREFIX . 'TxnRef'])->explode('|')->first(),
             'info' => $param[Constants::PREFIX . 'TransactionNo']
         ];
     }

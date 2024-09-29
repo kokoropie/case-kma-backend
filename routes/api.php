@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ConfigurationController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ShippingAddressController;
 use App\Http\Controllers\ShippingInfoController;
@@ -18,6 +19,7 @@ Route::middleware(['auth:sanctum'])->group( function () {
         ]);
 
         Route::resource('/address', ShippingAddressController::class)->whereUuid('address')->except(['create', 'edit']);
+        Route::resource('/order', OrderController::class)->whereUuid('order')->except(['create', 'edit']);
         
         Route::prefix('/payment')->group(function () {
             Route::post('/', [PaymentController::class, 'store']);

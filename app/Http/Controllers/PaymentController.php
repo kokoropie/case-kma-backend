@@ -191,7 +191,10 @@ class PaymentController extends Controller
                 'is_paid' => true,
                 'status' => 'processing'
             ]);
-        }
+            $order->payment()->update([
+                'info' => $details['info']
+            ]);
+        } 
         return response()->json($order);
     }
 }
