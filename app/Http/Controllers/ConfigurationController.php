@@ -79,7 +79,7 @@ class ConfigurationController extends Controller
     public function store(Request $request)
     {
         $data = collect($request->all());
-        $lowerValueWithKey = ["color". "model", "material", "finish"];
+        $lowerValueWithKey = ["color", "model", "material", "finish"];
         $data->transform(function ($value, $key) use ($lowerValueWithKey) {
             if (in_array($key, $lowerValueWithKey)) {
                 return strtolower($value);
