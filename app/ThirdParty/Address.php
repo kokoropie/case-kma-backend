@@ -209,7 +209,7 @@ class Address
         $param->put("Istype", 2);
         $param->put("language", 0);
 
-        if ($param->get("CountryCode") !== "VN") {
+        if (!str($param->get("CountryCode"))->is("VN")) {
             $param->put("ToProvince", "0");
             $param->put("ToDistrict", "0");
         }
@@ -218,7 +218,7 @@ class Address
 
         $response = collect(Http::get($url, $param->toArray())->json());
         
-        if ($response->get("Code") == "00") {
+        if (str($response->get("Code"))->is("00")) {
             $return = collect(collect($response->get("Message"))->firstWhere('Type', '1'))->mapWithKeys(function ($item, $key) {
                 if ($key == "Rates") {
                     return ["amount" => Currency::convert($item, "VND", "USD")];
