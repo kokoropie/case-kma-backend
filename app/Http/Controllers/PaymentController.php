@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\OrderStatus;
 use App\Models\Configuration;
 use App\Models\Order;
 use App\Models\Payment;
@@ -189,7 +190,7 @@ class PaymentController extends Controller
         if ($class::success($query)) {
             $order->update([
                 'is_paid' => true,
-                'status' => 'processing'
+                'status' => OrderStatus::PROCESSING
             ]);
             $order->payment()->update([
                 'info' => $details['info']
