@@ -61,7 +61,7 @@ class PaymentController extends Controller
                 'required',
                 function ($attribute, $value, $fail) use ($data) {
                     if ($data['address']['country'] === 'VN') {
-                        if (Address::districtDoesntExist($data['province'], $value)) {
+                        if (Address::districtDoesntExist($data["address"]['province'], $value)) {
                             $fail('The district is invalid.');
                         }
                     }
@@ -70,7 +70,7 @@ class PaymentController extends Controller
             'address.province' => [
                 'exclude_without:address',
                 'required',
-                function ($attribute, $value, $fail)  use ($data) {
+                function ($attribute, $value, $fail) use ($data) {
                     if ($data['address']['country'] === 'VN') {
                         if (Address::provinceDoesntExist($value)) {
                             $fail('The district is invalid.');
@@ -101,7 +101,7 @@ class PaymentController extends Controller
             'address.postal_code.required_unless' => 'The postal code field is required.',
             'address.country.required' => 'The country field is required.',
         ]);
-        
+
         if (isset($validated['shipping_address_id'])) {
             $shippingAddress = ShippingAddress::find($validated['shipping_address_id']);
         } else {
@@ -163,7 +163,7 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function return(string $payment) 
+    public function return(string $payment)
     {
         $query = request()->query();
         $class = match ($payment) {
@@ -195,7 +195,7 @@ class PaymentController extends Controller
             $order->payment()->update([
                 'info' => $details['info']
             ]);
-        } 
+        }
         return response()->json($order);
     }
 }
