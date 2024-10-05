@@ -16,7 +16,7 @@ Route::middleware(['auth:sanctum'])->group( function () {
     Route::middleware(['verified'])->group(function () {
         Route::resource('/configuration', ConfigurationController::class)->where([
             'configuration' => '[0-9]+',
-        ]);
+        ])->except(['create']);
 
         Route::resource('/address', ShippingAddressController::class)->whereUuid('address')->except(['create', 'edit']);
         Route::resource('/order', OrderController::class)->whereUuid('order')->except(['create', 'edit']);
@@ -26,6 +26,10 @@ Route::middleware(['auth:sanctum'])->group( function () {
         });
     });
 });
+
+Route::resource('/configuration', ConfigurationController::class)->where([
+    'configuration' => '[0-9]+',
+])->only(['create']);
 
 Route::prefix('shipping')->group(function () {
     Route::get('/country', [ShippingInfoController::class, 'country']);
