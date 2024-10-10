@@ -17,11 +17,11 @@ class ConfigurationPolicy
 
     public function update(User $user, Configuration $configuration)
     {
-        return $user->is_admin ||  $user->user_id === $configuration->user_id;
+        return $user->is_admin || $user->user_id === $configuration->user_id;
     }
 
     public function delete(User $user, Configuration $configuration)
     {
-        return $user->is_admin ||  $user->user_id === $configuration->user_id;
+        return $user->is_admin || $user->user_id === $configuration->user_id;
     }
 }

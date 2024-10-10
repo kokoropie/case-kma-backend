@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace App\ThirdParty\Paypal;
 use Carbon\Carbon;
 use Http;
@@ -24,7 +24,7 @@ class Paypal
     private function generateAccessToken()
     {
         $instance = self::getInstance();
-        if (!is_null($instance->lastTokenTime) && $instance->lastTokenTime->lessThan(Carbon::now())) { 
+        if (!is_null($instance->lastTokenTime) && $instance->lastTokenTime->lessThan(Carbon::now())) {
             $instance->lastTokenTime = null;
             $instance->token = null;
         }
@@ -34,8 +34,8 @@ class Paypal
                 ->post(config('paypal.base_url') . '/v1/oauth2/token', [
                     'grant_type' => 'client_credentials',
                 ]);
-                $instance->token = $response->json();
-                $instance->lastTokenTime = Carbon::now()->addSeconds($instance->token['expires_in']);
+            $instance->token = $response->json();
+            $instance->lastTokenTime = Carbon::now()->addSeconds($instance->token['expires_in']);
         }
 
         return $instance;
@@ -77,7 +77,7 @@ class Paypal
         $txnRef = $data['id'] ?? Str::uuid();
 
         $input = [
-            'intent' => Constants::INTENT_AUTHORIZE,
+            'intent' => Constants::INTENT_CAPTURE,
             'purchase_units' => [
                 [
                     'reference_id' => $txnRef,
@@ -110,8 +110,8 @@ class Paypal
 
         return ["paypal", $response->json()['id'], $link['href']];
     }
-    
-    public static function link($param) 
+
+    public static function link($param)
     {
         if (empty($param['token'])) {
             return '';
@@ -120,7 +120,7 @@ class Paypal
         if (self::success($param)) {
             return '';
         }
-        
+
         $checkout = self::checkout($param['token']);
         if (!$checkout) {
             return '';
@@ -136,7 +136,7 @@ class Paypal
         if (empty($orderId)) {
             return null;
         }
-        $response = cache()->driver('file')->remember("paypal_{$orderId}", 10, fn () => Http::withBasicAuth(config('paypal.client_id'), config('paypal.client_secret'))
+        $response = cache()->driver('file')->remember("paypal_{$orderId}", 10, fn() => Http::withBasicAuth(config('paypal.client_id'), config('paypal.client_secret'))
             ->contentType('application/json')
             ->get(config('paypal.base_url') . '/v2/checkout/orders/' . $orderId)->json());
 

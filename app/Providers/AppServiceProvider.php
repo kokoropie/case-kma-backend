@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Policies\ConfigurationPolicy;
+use App\Policies\OrderPolicy;
 use App\Policies\ShippingAddressPolicy;
 use Gate;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -31,5 +32,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('delete-configuration', [ConfigurationPolicy::class, 'delete']);
         Gate::define('update-shipping-address', [ShippingAddressPolicy::class, 'update']);
         Gate::define('delete-shipping-address', [ShippingAddressPolicy::class, 'delete']);
+        Gate::define('view-order', [OrderPolicy::class, 'view']);
     }
 }

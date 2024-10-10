@@ -104,7 +104,7 @@ class ShippingAddressController extends Controller
         }
 
         $user = auth('sanctum')->user();
-        
+
         $shippingAddress = new ShippingAddress();
         $shippingAddress->user_id = $user->user_id;
         $shippingAddress->fill($validated);
@@ -118,7 +118,15 @@ class ShippingAddressController extends Controller
      */
     public function show(ShippingAddress $shippingAddress)
     {
-        return response()->json($shippingAddress);
+        $address = collect($shippingAddress);
+        $address->forget('user_id');
+        if ($address->get('country') === 'VN') {
+            $address->put('postal_code', '');
+            $address->put('district', Address::district($address->get('province'), $address->get('district')));
+            $address->put('province', Address::province($address->get('province')));
+        }
+        $address->put('country', Address::country($address->get('country')));
+        return response()->json($address);
     }
 
     /**

@@ -182,19 +182,21 @@ class PaymentController extends Controller
         if ($order->is_paid) {
             return response()->json($order);
         }
-        if (empty($order->payment->info)) {
-            $order->payment()->update([
-                'info' => $details['info']
-            ]);
+        $payment = $order->payment;
+        if (!$payment) {
+            return response()->json($order);
+        }
+        if (empty($payment->info)) {
+            $payment->info = $details['info'];
+            $payment->save();
         }
         if ($class::success($query)) {
             $order->update([
                 'is_paid' => true,
                 'status' => OrderStatus::PROCESSING
             ]);
-            $order->payment()->update([
-                'info' => $details['info']
-            ]);
+            $payment->info = $details['info'];
+            $payment->save();
         }
         return response()->json($order);
     }

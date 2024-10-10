@@ -17,11 +17,11 @@ class ShippingAddressPolicy
 
     public function update(User $user, ShippingAddress $shippingAddress)
     {
-        return $user->is_admin ||  $user->user_id === $shippingAddress->user_id;
+        return $user->is_admin || $user->user_id === $shippingAddress->user_id;
     }
 
     public function delete(User $user, ShippingAddress $shippingAddress)
     {
-        return $user->is_admin ||  $user->user_id === $shippingAddress->user_id;
+        return $user->is_admin || $user->user_id === $shippingAddress->user_id;
     }
 }
