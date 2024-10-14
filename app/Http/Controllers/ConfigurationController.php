@@ -51,12 +51,12 @@ class ConfigurationController extends Controller
         $finish = [
             [
                 'slug' => 'smooth',
-                'name' => 'Smooth Finish',
+                'name' => 'Smooth',
                 'price' => 0
             ], 
             [
                 'slug' => 'textured',
-                'name' => 'Textured Finish',
+                'name' => 'Textured',
                 'description' => 'Soft grippy texture',
                 'price' => $config->get('finish_fee.value')
             ]

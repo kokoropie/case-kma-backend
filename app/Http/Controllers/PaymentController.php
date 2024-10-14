@@ -12,6 +12,8 @@ use App\ThirdParty\Currency\Currency;
 use App\ThirdParty\Paypal\Paypal;
 use App\ThirdParty\Vnpay\Vnpay;
 use Illuminate\Http\Request;
+use App\Mail\OrderConfirmed;
+use Mail;
 
 class PaymentController extends Controller
 {
@@ -191,6 +193,7 @@ class PaymentController extends Controller
             $payment->save();
         }
         if ($class::success($query)) {
+            Mail::to($order->user->email)->send(new OrderConfirmed($order));
             $order->update([
                 'is_paid' => true,
                 'status' => OrderStatus::PROCESSING

@@ -1,9 +1,11 @@
 <?php
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -36,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+            'admin' => \App\Http\Middleware\IsAdmin::class,
         ]);
 
         $middleware->trustProxies("*", 
@@ -53,4 +56,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->renderable(function (Throwable $e) {
             //
         });
+
+        $exceptions->render(
+            fn (NotFoundHttpException|ModelNotFoundException $e) => response()->json([
+                'message' => 'Resource not found',
+            ], 404)
+        );
     })->create();

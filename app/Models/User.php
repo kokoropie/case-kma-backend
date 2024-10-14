@@ -81,4 +81,17 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new VerifyEmail);
     }
+
+    protected static function booted(): void
+    {
+        static::created(function() {
+            cache()->tags('dashboard', 'users')->flush();
+            cache()->tags('users')->flush();
+        });
+
+        static::updated(function() {
+            cache()->tags('dashboard', 'users')->flush();
+            cache()->tags('users')->flush();
+        });
+    }
 }

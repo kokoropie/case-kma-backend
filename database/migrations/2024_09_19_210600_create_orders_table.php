@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->references('user_id')->on('users')->onDelete('cascade');
             $table->enum('payment_method', ['paypal', 'card', 'vnpay', 'bank']);
             $table->unsignedInteger('quantity');
-            $table->float('amount', 2);
+            $table->float('amount', precision: 2);
             $table->float('shipping_fee', 2)->default(0);
             $table->boolean('is_paid')->default(false);
             $table->enum('status', ['pending', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');

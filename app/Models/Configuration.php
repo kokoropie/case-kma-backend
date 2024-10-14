@@ -41,6 +41,11 @@ class Configuration extends Model
         return $this->belongsTo(PhoneModel::class, 'model', 'slug');
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'configuration_id', 'configuration_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
@@ -53,5 +58,12 @@ class Configuration extends Model
                 return $this->amount + $this->amount_material + $this->amount_finish;
             }
         );
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function() {
+            cache()->tags('dashboard', 'configurations')->flush();
+        });
     }
 }

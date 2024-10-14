@@ -107,4 +107,19 @@ class Order extends Model
             }
         );
     }
+
+    protected static function booted(): void
+    {
+        static::created(function() {
+            cache()->tags('dashboard', 'orders')->flush();
+            cache()->tags('orders')->flush();
+            cache()->tags('users')->flush();
+        });
+
+        static::updated(function() {
+            cache()->tags('dashboard', 'orders')->flush();
+            cache()->tags('orders')->flush();
+            cache()->tags('users')->flush();
+        });
+    }
 }

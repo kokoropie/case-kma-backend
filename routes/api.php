@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\ConfigController as AdminConfigController;
+use App\Http\Controllers\Admin\Config\ColorController as AdminColorController;
+use App\Http\Controllers\Admin\Config\ModelController as AdminModelController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
@@ -23,6 +29,17 @@ Route::middleware(['auth:sanctum'])->group( function () {
         
         Route::prefix('/payment')->group(function () {
             Route::post('/', [PaymentController::class, 'store']);
+        });
+
+        Route::middleware(['admin'])->prefix('/admin')->group(function () {
+            Route::get('/dashboard', [AdminDashboardController::class, 'index']);
+            Route::resource('/order', AdminOrderController::class)->whereUuid('order')->except(['create', 'edit']);
+            Route::resource('/user', AdminUserController::class)->except(['create', 'edit']);
+            Route::prefix('/config')->group(function () {
+                Route::resource('/color', AdminColorController::class)->except(['create', 'edit']);
+                Route::resource('/model', AdminModelController::class)->except(['create', 'edit']);
+            });
+            Route::resource('/config', AdminConfigController::class)->except(['create', 'edit']);
         });
     });
 });
