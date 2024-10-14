@@ -75,9 +75,9 @@ class DashboardController extends Controller
                     $listMonthsOfYear = cache()->store('file')->rememberForever("listMonthsOfYear_{$year}", fn() => collect(range(1, 12))->map(fn($month) => now()->setYear($year)->setMonth($month)->format('F')));
                     $zeroData = cache()->store('file')->rememberForever("zeroData_{$year}", fn() => collect($listMonthsOfYear)->mapWithKeys(fn($month) => [$month => 0]));
                     $filledCountData = $orders->whereBetween('created_at', [$startOfYear, $endOfYear])->groupBy(fn($order) => $order->created_at->format('F'))->map(fn($orders) => $orders->count());
-                    $filledCountData = $zeroData->collect()->merge($filledCountData)->sortKeys();
+                    $filledCountData = $zeroData->collect()->merge($filledCountData);
                     $filledAmountData = $orders->whereBetween('created_at', [$startOfYear, $endOfYear])->groupBy(fn($order) => $order->created_at->format('F'))->map(fn($orders) => $orders->sum('total_amount'));
-                    $filledAmountData = $zeroData->collect()->merge($filledAmountData)->sortKeys();
+                    $filledAmountData = $zeroData->collect()->merge($filledAmountData);
                     return collect([
                         'count' => $filledCountData->map(fn($value, $key) => ['month' => $key, 'value' => $value])->values(),
                         'amount' => $filledAmountData->map(fn($value, $key) => ['month' => $key, 'value' => $value])->values()
