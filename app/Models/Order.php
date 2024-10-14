@@ -73,14 +73,41 @@ class Order extends Model
                 }
                 $payment = $this->payment()->first();
                 if (!$payment) {
-                    return null;
-                }
+                    $method = match($this->payment_method) {
+                        'paypal', 'card' => 'paypal',
+                        'vnpay', 'bank' => 'vnpay',
+                        default => null,
+                    };
+                    $payment = new Payment();
+                    $payment->order_id = $this->order_id;
+                    $payment->method = $method;
+                    $payment->info = "";
+                    $payment->save();
+                } 
                 $class = match ($payment->method) {
                     'paypal' => Paypal::class,
                     'vnpay' => Vnpay::class,
                     default => null,
                 };
                 if ($class) {
+                    if (!$payment->info) {
+                        [$method, $info, $url] = match ($this->payment_method) {
+                            'paypal', 'card' => Paypal::amount($this->total_amount)->create([
+                                'id' => $this->order_id
+                            ]),
+                            'vnpay' => Vnpay::amount(Currency::convert($this->total_amount, 'USD', 'VND'))->payqr()->create([
+                                'id' => $this->order_id
+                            ]),
+                            'bank' => Vnpay::amount(Currency::convert($this->total_amount, 'USD', 'VND'))->bank()->create([
+                                'id' => $this->order_id
+                            ]),
+                        };
+                        $payment->info = $info;
+
+                        $payment->save();
+
+                        return $url;
+                    }
                     $data = match ($payment->method) {
                         'paypal' => [
                             'token' => $payment->info

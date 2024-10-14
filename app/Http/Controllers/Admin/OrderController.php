@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Enum\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\User;
 use Gate;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
@@ -18,14 +18,14 @@ class OrderController extends Controller
     {
         Gate::authorize('admin');
 
-        cache()->tags('orders')->flush();
+        // cache()->tags('orders')->flush();
 
         $page = request()->query('page', 1);
         $limit = request()->query('limit', 10);
 
         $orderBy = request()->query('orderBy', 'created_at');
         $orderDirection = request()->query('orderDirection', 'desc');
-        if (!in_array($orderDirection, ['asc', 'desc'])) {
+        if (!in_array($orderDirection, haystack: ['asc', 'desc'])) {
             $orderDirection = 'desc';
         }
         $columns = [
@@ -48,7 +48,7 @@ class OrderController extends Controller
             if ($status) {
                 $query->where('status', $status);
             }
-            return $query->orderBy($orderBy, $orderDirection)->paginate($limit)->withQueryString();
+            return $query->orderBy($orderBy, $orderDirection)->with(["configuration.color", "configuration.model"])->paginate($limit)->withQueryString();
         });
 
         return response()->json($orders);
@@ -65,7 +65,7 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(Order $order)
     {
         //
     }
@@ -73,15 +73,29 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, Order $order)
     {
-        //
+        Gate::authorize('admin');
+
+        $validated = $request->validate([
+            'action' => 'required|in:status',
+            'status' => [
+                'required_if:action,status',
+                Rule::enum(OrderStatus::class),
+            ]
+        ]);
+
+        $order->update([
+            'status' => $validated['status'],
+        ]);
+
+        return response()->json($order);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(Order $order)
     {
         //
     }

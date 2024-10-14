@@ -37,15 +37,33 @@ class DashboardController extends Controller
                     $endOfYear = now()->setYear($year)->endOfYear()->format('Y-m-d H:i:s');
 
                     return collect([
-                        'total' => $orders->count(),
-                        OrderStatus::PENDING->value => $orders->where('status', OrderStatus::PENDING)->count(),
-                        OrderStatus::PROCESSING->value => $orders->where('status', OrderStatus::PROCESSING)->count(),
-                        OrderStatus::SHIPPED->value => $orders->where('status', OrderStatus::SHIPPED)->count(),
-                        OrderStatus::COMPLETED->value => $orders->where('status', OrderStatus::COMPLETED)->count(),
-                        OrderStatus::CANCELLED->value => $orders->where('status', OrderStatus::CANCELLED)->count(),
-                        'paid' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->count(),
-                        'month' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count(),
-                        'year' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->whereBetween('created_at', [$startOfYear, $endOfYear])->count(),
+                        'total' => collect([
+                            "total" => $orders->count(),
+                            OrderStatus::PENDING->value => $orders->where('status', OrderStatus::PENDING)->count(),
+                            OrderStatus::PROCESSING->value => $orders->where('status', OrderStatus::PROCESSING)->count(),
+                            OrderStatus::SHIPPED->value => $orders->where('status', OrderStatus::SHIPPED)->count(),
+                            OrderStatus::COMPLETED->value => $orders->where('status', OrderStatus::COMPLETED)->count(),
+                            OrderStatus::CANCELLED->value => $orders->where('status', OrderStatus::CANCELLED)->count(),
+                            'paid' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->count(),
+                        ]),
+                        'month' => collect([
+                            "total" => $orders->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count(),
+                            OrderStatus::PENDING->value => $orders->where('status', OrderStatus::PENDING)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count(),
+                            OrderStatus::PROCESSING->value => $orders->where('status', OrderStatus::PROCESSING)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count(),
+                            OrderStatus::SHIPPED->value => $orders->where('status', OrderStatus::SHIPPED)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count(),
+                            OrderStatus::COMPLETED->value => $orders->where('status', OrderStatus::COMPLETED)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count(),
+                            OrderStatus::CANCELLED->value => $orders->where('status', OrderStatus::CANCELLED)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count(),
+                            'paid' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count(),
+                        ]),
+                        'year' => collect([
+                            "total" => $orders->whereBetween('created_at', [$startOfYear, $endOfYear])->count(),
+                            OrderStatus::PENDING->value => $orders->where('status', OrderStatus::PENDING)->whereBetween('created_at', [$startOfYear, $endOfYear])->count(),
+                            OrderStatus::PROCESSING->value => $orders->where('status', OrderStatus::PROCESSING)->whereBetween('created_at', [$startOfYear, $endOfYear])->count(),
+                            OrderStatus::SHIPPED->value => $orders->where('status', OrderStatus::SHIPPED)->whereBetween('created_at', [$startOfYear, $endOfYear])->count(),
+                            OrderStatus::COMPLETED->value => $orders->where('status', OrderStatus::COMPLETED)->whereBetween('created_at', [$startOfYear, $endOfYear])->count(),
+                            OrderStatus::CANCELLED->value => $orders->where('status', OrderStatus::CANCELLED)->whereBetween('created_at', [$startOfYear, $endOfYear])->count(),
+                            'paid' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->whereBetween('created_at', [$startOfYear, $endOfYear])->count(),
+                        ]),
                     ]);
                 }),
                 'amount' => cache()->tags('dashboard', 'orders', $year, $month)->rememberForever('orders-amount', function () use ($year, $month) {
@@ -56,15 +74,33 @@ class DashboardController extends Controller
                     $endOfYear = now()->setYear($year)->endOfYear()->format('Y-m-d H:i:s');
 
                     return collect([
-                        'total' => $orders->sum('total_amount'),
-                        OrderStatus::PENDING->value => $orders->where('status', OrderStatus::PENDING)->sum('total_amount'),
-                        OrderStatus::PROCESSING->value => $orders->where('status', OrderStatus::PROCESSING)->sum('total_amount'),
-                        OrderStatus::COMPLETED->value => $orders->where('status', OrderStatus::COMPLETED)->sum('total_amount'),
-                        OrderStatus::SHIPPED->value => $orders->where('status', OrderStatus::SHIPPED)->sum('total_amount'),
-                        OrderStatus::CANCELLED->value => $orders->where('status', OrderStatus::CANCELLED)->sum('total_amount'),
-                        'paid' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->sum('total_amount'),
-                        'month' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum('total_amount'),
-                        'year' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->whereBetween('created_at', [$startOfYear, $endOfYear])->sum('total_amount'),
+                        'total' => collect([
+                            "total" => $orders->sum("total_amount"),
+                            OrderStatus::PENDING->value => $orders->where('status', OrderStatus::PENDING)->sum("total_amount"),
+                            OrderStatus::PROCESSING->value => $orders->where('status', OrderStatus::PROCESSING)->sum("total_amount"),
+                            OrderStatus::SHIPPED->value => $orders->where('status', OrderStatus::SHIPPED)->sum("total_amount"),
+                            OrderStatus::COMPLETED->value => $orders->where('status', OrderStatus::COMPLETED)->sum("total_amount"),
+                            OrderStatus::CANCELLED->value => $orders->where('status', OrderStatus::CANCELLED)->sum("total_amount"),
+                            'paid' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->sum("total_amount"),
+                        ]),
+                        'month' => collect([
+                            "total" => $orders->whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum("total_amount"),
+                            OrderStatus::PENDING->value => $orders->where('status', OrderStatus::PENDING)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum("total_amount"),
+                            OrderStatus::PROCESSING->value => $orders->where('status', OrderStatus::PROCESSING)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum("total_amount"),
+                            OrderStatus::SHIPPED->value => $orders->where('status', OrderStatus::SHIPPED)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum("total_amount"),
+                            OrderStatus::COMPLETED->value => $orders->where('status', OrderStatus::COMPLETED)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum("total_amount"),
+                            OrderStatus::CANCELLED->value => $orders->where('status', OrderStatus::CANCELLED)->whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum("total_amount"),
+                            'paid' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum("total_amount"),
+                        ]),
+                        'year' => collect([
+                            "total" => $orders->whereBetween('created_at', [$startOfYear, $endOfYear])->sum("total_amount"),
+                            OrderStatus::PENDING->value => $orders->where('status', OrderStatus::PENDING)->whereBetween('created_at', [$startOfYear, $endOfYear])->sum("total_amount"),
+                            OrderStatus::PROCESSING->value => $orders->where('status', OrderStatus::PROCESSING)->whereBetween('created_at', [$startOfYear, $endOfYear])->sum("total_amount"),
+                            OrderStatus::SHIPPED->value => $orders->where('status', OrderStatus::SHIPPED)->whereBetween('created_at', [$startOfYear, $endOfYear])->sum("total_amount"),
+                            OrderStatus::COMPLETED->value => $orders->where('status', OrderStatus::COMPLETED)->whereBetween('created_at', [$startOfYear, $endOfYear])->sum("total_amount"),
+                            OrderStatus::CANCELLED->value => $orders->where('status', OrderStatus::CANCELLED)->whereBetween('created_at', [$startOfYear, $endOfYear])->sum("total_amount"),
+                            'paid' => $orders->whereNotIn('status', [OrderStatus::PENDING, OrderStatus::CANCELLED])->whereBetween('created_at', [$startOfYear, $endOfYear])->sum("total_amount"),
+                        ]),
                     ]);
                 }),
                 'chart' => cache()->tags('dashboard', 'orders', $year)->rememberForever('orders-chart', function () use ($year) {
