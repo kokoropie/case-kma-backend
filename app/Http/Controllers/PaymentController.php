@@ -75,7 +75,7 @@ class PaymentController extends Controller
                 function ($attribute, $value, $fail) use ($data) {
                     if ($data['address']['country'] === 'VN') {
                         if (Address::provinceDoesntExist($value)) {
-                            $fail('The district is invalid.');
+                            $fail('The province is invalid.');
                         }
                     }
                 }

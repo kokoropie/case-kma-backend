@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -21,6 +22,24 @@ class AuthenticatedSessionController extends Controller
         // $request->session()->regenerate();
         
         $user = $request->user();
+
+        if ($user->is_lock) {
+            $end_at = null;
+            if (!is_null($user->lock->end_at)) {
+                $end_at = Carbon::parse($user->lock->end_at);
+            }
+            if ($end_at && $end_at->lessThanOrEqualTo(now())) {
+                $user->lock()->delete();
+            } else {
+                $message = "This user is locked. Reason: " . $user->lock->reason . ". ";
+                if ($end_at) {
+                    $message .= "Unlock at " . $end_at->format("Y-m-d H:i:s");
+                }
+                return response()->json([
+                    "message" => $message
+                ], 403);
+            }
+        }
 
         return response()->json([
             'user' => $user,

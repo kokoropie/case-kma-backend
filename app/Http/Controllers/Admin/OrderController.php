@@ -48,7 +48,7 @@ class OrderController extends Controller
             if ($status) {
                 $query->where('status', $status);
             }
-            return $query->orderBy($orderBy, $orderDirection)->with(["configuration.color", "configuration.model"])->paginate($limit)->withQueryString();
+            return $query->orderBy($orderBy, $orderDirection)->with(["configuration.color", "configuration.model", "shippingAddress"])->paginate($limit)->withQueryString();
         });
 
         return response()->json($orders);

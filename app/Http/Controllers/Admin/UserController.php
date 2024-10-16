@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\LockUser;
 use App\Models\User;
 use Gate;
 use Illuminate\Http\Request;
@@ -19,8 +20,8 @@ class UserController extends Controller
         $page = request()->query('page', 1);
         $limit = request()->query('limit', 10);
 
-        $orderBy = request()->query('orderBy', default: 'created_at');
-        $orderDirection = request()->query('orderDirection', 'desc');
+        $orderBy = strtolower(request()->query('orderBy', default: 'created_at'));
+        $orderDirection = strtolower(request()->query('orderDirection', 'desc'));
         if (!in_array($orderDirection, ['asc', 'desc'])) {
             $orderDirection = 'desc';
         }
@@ -90,7 +91,38 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        Gate::authorize('admin');
+
+        $validated = $request->validate([
+            "name" => "required|string",
+            "role" => "required|in:admin,user",
+            "is_lock" => "required|boolean",
+            "reason" => "required_if_accepted:is_lock|string",
+            "time" => "nullable|numeric"
+        ]);
+
+        $user->name = $validated["name"];
+        $user->role = $validated["role"];
+        if ($user->is_lock != $validated["is_lock"]) {
+            if ($user->is_lock) {
+                $user->lock()->delete();
+            } else {
+                $lock = new LockUser;
+                $lock->reason = $validated["reason"];
+                $time = $validated["time"];
+                if ($time) {
+                    $lock->end_at = now()->addDays($time);
+                }
+                $lock->user_id = $user->user_id;
+                $lock->save();
+            }
+        }
+        if ($user->isDirty())
+        {
+            $user->save();
+        }
+
+        return response()->json($user);
     }
 
     /**

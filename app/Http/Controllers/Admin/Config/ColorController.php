@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CaseColor;
 use Gate;
 use Illuminate\Http\Request;
+use Str;
 
 class ColorController extends Controller
 {
@@ -26,7 +27,24 @@ class ColorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Gate::authorize('admin');
+
+        $validated = $request->validate([
+            "name" => "required|string",
+            "hex_code" => "required|hex_color"
+        ]);
+
+        $color = new CaseColor;
+        $color->name = $validated["name"];
+        do 
+        {
+            $slug = Str::slug($color->name);
+        } while (CaseColor::find($slug));
+        $color->slug = $slug;
+        $color->hex_code = $validated["hex_code"];
+        $color->save();
+
+        return response()->json($color);
     }
 
     /**
@@ -44,7 +62,18 @@ class ColorController extends Controller
      */
     public function update(Request $request, CaseColor $color)
     {
-        //
+        Gate::authorize('admin');
+
+        $validated = $request->validate([
+            "name" => "required|string",
+            "hex_code" => "required|hex_color"
+        ]);
+
+        $color->name = $validated["name"];
+        $color->hex_code = $validated["hex_code"];
+        $color->save();
+
+        return response()->json($color);
     }
 
     /**
@@ -52,6 +81,10 @@ class ColorController extends Controller
      */
     public function destroy(CaseColor $color)
     {
-        //
+        Gate::authorize('admin');
+
+        $color->delete();
+
+        return response()->json(CaseColor::all());
     }
 }

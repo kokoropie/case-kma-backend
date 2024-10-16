@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum'])->group( function () {
                 Route::resource('/model', AdminModelController::class)->except(['create', 'edit']);
             });
             Route::resource('/config', AdminConfigController::class)->except(['create', 'edit']);
+            Route::put('/config', [AdminConfigController::class, 'updateAll']);
         });
     });
 });

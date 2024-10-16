@@ -39,7 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    protected $appends = ['is_admin'];
+    protected $appends = ['is_admin', 'is_lock'];
 
     /**
      * Get the attributes that should be cast.
@@ -62,6 +62,13 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
+    public function isLock(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->lock()->exists()
+        );
+    }
+
     public function shippingAddresses()
     {
         return $this->hasMany(ShippingAddress::class, 'user_id', 'user_id');
@@ -75,6 +82,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function orders()
     {
         return $this->hasMany(Order::class, 'user_id', 'user_id');
+    }
+
+    public function lock()
+    {
+        return $this->hasOne(LockUser::class, "user_id", "user_id");
     }
     
     public function sendEmailVerificationNotification(): void
