@@ -23,6 +23,8 @@ class AuthenticatedSessionController extends Controller
         
         $user = $request->user();
 
+        // dd($user->user_id);
+
         if ($user->is_lock) {
             $end_at = null;
             if (!is_null($user->lock->end_at)) {
@@ -31,7 +33,7 @@ class AuthenticatedSessionController extends Controller
             if ($end_at && $end_at->lessThanOrEqualTo(now())) {
                 $user->lock()->delete();
             } else {
-                $message = "This user is locked. Reason: " . $user->lock->reason . ". ";
+                $message = "This user is locked. ";
                 if ($end_at) {
                     $message .= "Unlock at " . $end_at->format("Y-m-d H:i:s");
                 }

@@ -94,29 +94,38 @@ class UserController extends Controller
         Gate::authorize('admin');
 
         $validated = $request->validate([
-            "name" => "required|string",
-            "role" => "required|in:admin,user",
-            "is_lock" => "required|boolean",
-            "reason" => "required_if_accepted:is_lock|string",
-            "time" => "nullable|numeric"
+            "name" => "nullable|string",
+            "role" => "nullable|in:admin,user",
+            "is_lock" => "nullable|boolean",
+            // "reason" => "required_if_accepted:is_lock|string",
+            // "time" => "nullable|numeric|min:1"
         ]);
 
-        $user->name = $validated["name"];
-        $user->role = $validated["role"];
-        if ($user->is_lock != $validated["is_lock"]) {
-            if ($user->is_lock) {
-                $user->lock()->delete();
-            } else {
-                $lock = new LockUser;
-                $lock->reason = $validated["reason"];
-                $time = $validated["time"];
-                if ($time) {
-                    $lock->end_at = now()->addDays($time);
+        if (!empty($validated["name"])) {
+            $user->name = $validated["name"];
+        }
+
+        if (!empty($validated["role"])) {
+            $user->role = $validated["role"];
+        }
+
+        if (isset($validated["is_lock"])) {
+            if ($user->is_lock != $validated["is_lock"]) {
+                if ($user->is_lock) {
+                    $user->lock()->delete();
+                } else {
+                    $lock = new LockUser;
+                    $lock->reason = "";
+                    // $lock->reason = $validated["reason"];
+                    // if (isset($validated["time"])) {
+                    //     $lock->end_at = now()->addDays($validated["time"]);
+                    // }
+                    $lock->user_id = $user->user_id;
+                    $lock->save();
                 }
-                $lock->user_id = $user->user_id;
-                $lock->save();
             }
         }
+        
         if ($user->isDirty())
         {
             $user->save();

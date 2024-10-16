@@ -23,7 +23,7 @@ class RegisteredUserController extends Controller
     {
         collect($request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class.',email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]));
 
