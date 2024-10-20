@@ -25,4 +25,9 @@ class CaseColor extends Model
     {
         return $this->hasMany(Configuration::class, 'color', 'slug');
     }
+
+    public function orders()
+    {
+        return $this->hasManyThrough(Order::class, Configuration::class, 'color', 'configuration_id', 'slug', 'configuration_id');
+    }
 }

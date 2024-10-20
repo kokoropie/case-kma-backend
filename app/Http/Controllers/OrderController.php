@@ -16,7 +16,7 @@ class OrderController extends Controller
     {
         $user = auth('sanctum')->user();
 
-        $orders = collect($user->orders()->get()->append(['link']));
+        $orders = collect($user->orders()->orderBy("created_at", "desc")->get()->append(['link']));
         
         $orders->transform(function ($order) {
             $order->shippingAddress->setHidden(['user_id']);

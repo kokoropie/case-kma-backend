@@ -33,7 +33,8 @@ class ConfigurationController extends Controller
             )
             ->dot();
         $base = $config->get('base_fee.value');
-        $color = CaseColor::all();
+        $color = CaseColor::all()->loadCount(['orders'])->sortByDesc('orders_count');
+
         $model = PhoneModel::all();
         $material = [
             [
