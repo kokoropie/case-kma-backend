@@ -122,13 +122,13 @@ class Paypal
         }
 
         $checkout = self::checkout($param['token']);
-        if (!$checkout) {
+        if (empty($checkout)) {
             return '';
         }
 
         $link = collect($checkout['links'])->firstWhere('rel', 'payer-action');
 
-        return $link['href'];
+        return $link && isset($link['href']) ? $link['href'] : '';
     }
 
     private static function checkout(string $orderId)
@@ -153,7 +153,7 @@ class Paypal
         if (!$checkout) {
             return false;
         }
-        return $checkout['status'] === Constants::STATUS_APPROVED;
+        return isset($checkout['status']) && $checkout['status'] === Constants::STATUS_APPROVED;
     }
 
     public static function details(array $param): array|null
